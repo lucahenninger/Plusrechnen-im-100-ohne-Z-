@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Video für Kinder</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #1a1a2e;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: sans-serif;
+    }
+    h1 {
+      color: #fff;
+      margin-bottom: 16px;
+      font-size: 1.2rem;
+      text-align: center;
+      padding: 0 12px;
+    }
+    #player-wrapper {
+      width: 100%;
+      max-width: 800px;
+      aspect-ratio: 16/9;
+      padding: 0 12px;
+    }
+    #player-wrapper iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: 12px;
+    }
+    #ended-msg {
+      display: none;
+      color: #fff;
+      font-size: 1.4rem;
+      text-align: center;
+      padding: 40px 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎬 Viel Spaß beim Anschauen!</h1>
+  <div id="player-wrapper">
+    <div id="player"></div>
+  </div>
+  <div id="ended-msg">✅ Das Video ist jetzt zu Ende!<br>Super, dass du zugeschaut hast! 🎉</div>
+
+  <script>
+    const VIDEO_ID = 'LVBZViKH7rU';
+    const START    = 0;    // Sekunden
+    const END      = 137;  // 2:17 = 137 Sekunden
+
+    // YouTube IFrame API laden
+    var tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.head.appendChild(tag);
+
+    var player;
+    var checkInterval;
+
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('player', {
+        videoId: VIDEO_ID,
+        playerVars: {
+          start: START,
+          end: END,
+          autoplay: 0,
+          rel: 0,
+          modestbranding: 1,
+          playsinline: 1
+        },
+        events: {
+          onReady: onPlayerReady,
+          onStateChange: onPlayerStateChange
+        }
+      });
+    }
+
+    function onPlayerReady(event) {
+      // Sicherheitsnetz: alle 500ms prüfen ob Endzeit erreicht
+      checkInterval = setInterval(function() {
+        if (player && player.getCurrentTime) {
+          if (player.getCurrentTime() >= END) {
+            stopVideo();
+          }
+        }
+      }, 500);
+    }
+
+    function onPlayerStateChange(event) {
+      // YT.PlayerState.ENDED = 0
+      if (event.data === YT.PlayerState.ENDED) {
+        stopVideo();
+      }
+    }
+
+    function stopVideo() {
+      clearInterval(checkInterval);
+      player.stopVideo();
+      document.getElementById('player-wrapper').style.display = 'none';
+      document.getElementById('ended-msg').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
